@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Каталог товаров</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body>
+    <form action="{% url 'logout' %}" method="post">
+        {% csrf_token %}
+        <button type="submit" class="logout-button">Выйти</button>
+    </form>
+    {% for product in products %}
+    <div class="product-card">
+        <div class="product-image">
+            <img src="/static/image/{{ product.image }}" alt="{{ product.product }}">
+        </div>
+        <div class="product-details">
+            <h2 class="product-title">{{ product.category.name }} | {{ product.product }}</h2>
+            <div class="info-row">Артикул: {{ product.article }}</div>
+            <div class="info-row">Описание товара: {{ product.description }}</div>
+            <div class="info-row">Производитель: {{ product.producer.name }}</div>
+            <div class="info-row">Поставщик: {{ product.manufacturer.name }}</div>
+            {% if product.discount > 0 %}
+            <div class="info-row">Цена: <s style="color: red">{{ product.price }} Р</s> | {{ product.get_final_price|floatformat:2 }} </div>
+            {% else %}
+            <div class="info-row"> Цена: {{product.price}} Р</div>
+            {% endif %}
+            <div class="info-row">Единица измерения: {{ product.unit }}</div>
+            <div style="{% if product.amount_on_warehouse == 0 %}background-color: #00ffff;{% endif %}"><strong>Количество на складе:</strong> {{product.amount_on_warehouse}}</div>
+        </div>
+        <div class="product-discount" style="{% if product.discount > 15 %}background-color: #2E8B57; color: white; {% endif %}">
+            <div class="discount-text">Действующая скидка</div>
+            <div class="discount-value">{{ product.discount|floatformat:"0" }}%</div>
+        </div>
+    </div>
+    {% empty %}
+    <p class="no-products">Товары не найдены.</p>
+    {% endfor %}
+</body>
+</html>

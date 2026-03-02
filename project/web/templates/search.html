@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Каталог товаров</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body>
+    <form action="{% url 'logout' %}" method="post">
+        {% csrf_token %}
+        <button type="submit" class="logout-button">Выйти</button>
+    </form>
+    <div class="filter-container">
+        <form method="get" action="" class="search-form">
+            <input type="hidden" name="sort" value="{{ current_sort }}">
+
+            <div class="search-wrapper">
+                <span class="search-icon">🔍</span>
+                <input class="search-input" type="text" name="search"
+                       placeholder="Поиск товара"
+                       value="{{ search_query }}">
+            </div>
+
+            <select class="category-select" name="category" onchange="this.form.submit()">
+                <option value="">Все категории</option>
+                {% for category in categories %}
+                <option value="{{ category.id }}" {% if current_category == category.id|stringformat:"s" %}selected{% endif %}>
+                    {{ category.name }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <button class="btn btn-primary" type="submit">
+                🔍 Найти
+            </button>
+
+            {% if search_query or current_category or current_sort %}
+            <a href="?" class="btn btn-danger">
+                ✖ Сбросить
+            </a>
+            {% endif %}
+        </form>
+
+        <div class="sort-buttons">
+            <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if current_category %}category={{ current_category }}&{% endif %}sort=amount_asc"
+               class="btn {% if current_sort == 'amount_asc' %}btn-primary{% else %}btn-default{% endif %}">
+                ↑ По возрастанию
+            </a>
+            <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if current_category %}category={{ current_category }}&{% endif %}sort=amount_desc"
+               class="btn {% if current_sort == 'amount_desc' %}btn-primary{% else %}btn-default{% endif %}">
+                ↓ По убыванию
+            </a>
+        </div>
+    </div>
+
+    {% for product in products %}
+    <div class="product-card">
+        <div class="product-image">
+            <img src="/static/image/{{ product.image }}" alt="{{ product.product }}">
+        </div>
+        <div class="product-details">
+            <h2 class="product-title">{{ product.category.name }} | {{ product.product }}</h2>
+            <div class="info-row"><strong>Артикул:</strong> {{ product.article }}</div>
+            <div class="info-row"><strong>Описание товара:</strong> {{ product.description }}</div>
+            <div class="info-row"><strong>Производитель:</strong> {{ product.producer.name }}</div>
+            <div class="info-row"><strong>Поставщик:</strong> {{ product.manufacturer.name }}</div>
+
+            {% if product.discount > 0 %}
+            <div class="info-row">
+                <strong>Цена:</strong>
+                <span class="price-old">{{ product.price }} Р</span> |
+                <strong>{{ product.get_final_price|floatformat:2 }} Р</strong>
+            </div>
+            {% else %}
+            <div class="info-row"><strong>Цена:</strong> {{ product.price }} Р</div>
+            {% endif %}
+
+            <div class="info-row"><strong>Единица измерения:</strong> {{ product.unit }}</div>
+
+            <div class="info-row">
+                <strong>Количество на складе:</strong>
+                <span {% if product.amount_on_warehouse == 0 %}class="out-of-stock"{% endif %}>
+                    {{ product.amount_on_warehouse }}
+                </span>
+            </div>
+        </div>
+
+        {% if product.discount > 0 %}
+        <div class="product-discount {% if product.discount > 15 %}discount-high{% endif %}">
+            <div class="discount-text">Действующая скидка</div>
+            <div class="discount-value">{{ product.discount|floatformat:"0" }}%</div>
+        </div>
+        {% endif %}
+    </div>
+    {% empty %}
+    <p class="no-products">Товары не найдены.</p>
+    {% endfor %}
+</body>
+</html>

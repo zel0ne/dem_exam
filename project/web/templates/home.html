@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Главная страница</title>
+</head>
+    <div>
+        <h3> Добро пожаловать, {{first_name}}!</h3>
+        <h4> роль: {{role}} </h4>
+        <form method="POST">
+            {% csrf_token %}
+            <a href="{% url 'logout' %}">Выйти</a>
+        </form>
+    </div>
+</html>
